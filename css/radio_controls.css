@@ -1,0 +1,101 @@
+
+
+/* =========================================================
+   RADIO — minimal Play / Stop controls
+   Does not change the existing game geometry.
+   ========================================================= */
+
+.radio-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+    min-height:28px;
+}
+
+.radio-button{
+    width:34px;
+    height:26px;
+    padding:0;
+    border:1px solid var(--border);
+    background:rgba(30,70,45,.045);
+    color:var(--text-dim);
+    font-family:inherit;
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+    transition:
+        color .12s ease,
+        border-color .12s ease,
+        background .12s ease,
+        box-shadow .12s ease,
+        transform .08s ease;
+}
+
+.radio-button:hover{
+    color:var(--green-soft);
+    border-color:var(--border-bright);
+    background:rgba(80,180,105,.06);
+}
+
+.radio-button:active{
+    transform:scale(.94);
+}
+
+.radio-button.active{
+    color:var(--green);
+    border-color:var(--green-soft);
+    background:rgba(80,180,105,.09);
+    box-shadow:0 0 9px rgba(140,255,170,.08);
+}
+
+.radio-button:focus-visible{
+    outline:1px solid var(--green);
+    outline-offset:2px;
+}
+
+/*
+ * The GTI player is intentionally invisible.
+ * We create it only after PLAY and remove it on STOP.
+ */
+.radio-iframe{
+    position:fixed;
+    left:-1000px;
+    top:-1000px;
+    width:1px;
+    height:1px;
+    border:0;
+    opacity:0;
+    pointer-events:none;
+    overflow:hidden;
+}
+
+@media(max-width:600px){
+    .radio-controls{
+        margin-top:6px;
+        min-height:24px;
+    }
+
+    .radio-button{
+        width:31px;
+        height:23px;
+        font-size:10px;
+    }
+}
+
+@media(max-width:600px) and (max-height:600px){
+    .radio-controls{
+        margin-top:4px;
+        min-height:21px;
+        gap:6px;
+    }
+
+    .radio-button{
+        width:27px;
+        height:20px;
+        font-size:9px;
+    }
+}
