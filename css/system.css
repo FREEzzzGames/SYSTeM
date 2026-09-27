@@ -2,12 +2,13 @@
    SYSTeM
    CORE v0.1.0
    VISUAL FOUNDATION
-   MOBILE 9:16 BASE
+   STEP 1 — MOBILE 9:16
    ========================================================= */
 
 :root {
     --bg: #050806;
     --panel: #070c09;
+    --panel-alt: #080e0a;
 
     --green: #8cffaa;
     --green-soft: #69c984;
@@ -36,8 +37,8 @@
     box-sizing: border-box;
 }
 
-
-html {
+html,
+body {
     width: 100%;
     height: 100%;
 
@@ -47,15 +48,7 @@ html {
     background: var(--bg);
 }
 
-
 body {
-    width: 100%;
-    height: 100%;
-
-    margin: 0;
-    padding: 0;
-
-    background: var(--bg);
     color: var(--text);
 
     font-family:
@@ -101,14 +94,17 @@ body::before {
 
 
 /* =========================================================
-   GLOBAL LANGUAGE SWITCHER
+   LANGUAGE SWITCHER
+   FIXED / CENTER TOP
    ========================================================= */
 
 .language-switcher {
     position: fixed;
 
-    top: 8px;
-    right: 8px;
+    top: 6px;
+    left: 50%;
+
+    transform: translateX(-50%);
 
     z-index: 2000;
 
@@ -209,9 +205,9 @@ body::before {
     margin: 0 auto;
 
     padding:
-        8px
-        10px
-        10px;
+        7px
+        9px
+        8px;
 
     display: flex;
 
@@ -226,10 +222,9 @@ body::before {
    ========================================================= */
 
 .system-header {
-    flex:
-        0 0 58px;
+    flex: 0 0 56px;
 
-    min-height: 58px;
+    min-height: 56px;
 
     border: 1px solid var(--border);
 
@@ -247,8 +242,8 @@ body::before {
     justify-content: space-between;
 
     padding:
-        10px
-        18px;
+        9px
+        17px;
 
     box-shadow: var(--shadow);
 }
@@ -257,7 +252,7 @@ body::before {
 .system-name {
     color: var(--green);
 
-    font-size: 23px;
+    font-size: 22px;
 
     letter-spacing: 4px;
 
@@ -318,7 +313,7 @@ body::before {
    ========================================================= */
 
 .panel {
-    margin-top: 8px;
+    margin-top: 7px;
 
     border: 1px solid var(--border);
 
@@ -336,7 +331,7 @@ body::before {
 
 
 .panel-title {
-    min-height: 38px;
+    min-height: 36px;
 
     display: flex;
 
@@ -344,7 +339,7 @@ body::before {
 
     padding:
         0
-        18px;
+        17px;
 
     border-bottom: 1px solid var(--border);
 
@@ -357,7 +352,7 @@ body::before {
 
 
 /* =========================================================
-   STATUS
+   SYSTEM STATUS
    ========================================================= */
 
 .status-panel {
@@ -365,8 +360,6 @@ body::before {
 
     grid-template-columns:
         repeat(3, 1fr);
-
-    position: relative;
 }
 
 
@@ -376,11 +369,11 @@ body::before {
 
 
 .status-row {
-    min-height: 65px;
+    min-height: 62px;
 
     padding:
-        10px
-        15px;
+        9px
+        13px;
 
     border-right: 1px solid var(--border);
 
@@ -390,7 +383,7 @@ body::before {
 
     justify-content: center;
 
-    gap: 7px;
+    gap: 6px;
 }
 
 
@@ -411,7 +404,7 @@ body::before {
 .status-value {
     color: var(--text);
 
-    font-size: 13px;
+    font-size: 12px;
 
     letter-spacing: 0.5px;
 }
@@ -422,16 +415,15 @@ body::before {
    ========================================================= */
 
 .process-panel {
-    flex:
-        0 0 auto;
+    flex: 0 0 auto;
 }
 
 
 .process-content {
     padding:
+        15px
         17px
-        18px
-        18px;
+        16px;
 
     text-align: center;
 }
@@ -444,7 +436,7 @@ body::before {
 
     letter-spacing: 3px;
 
-    margin-bottom: 9px;
+    margin-bottom: 8px;
 }
 
 
@@ -454,7 +446,7 @@ body::before {
     font-size:
         clamp(
             34px,
-            10vw,
+            9vw,
             48px
         );
 
@@ -464,7 +456,7 @@ body::before {
 
     line-height: 1;
 
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 
     text-shadow:
         0 0 12px rgba(140, 255, 170, 0.16);
@@ -474,8 +466,8 @@ body::before {
 .process-button {
     width: 100%;
 
-    height: 64px;
-    min-height: 64px;
+    height: 60px;
+    min-height: 60px;
 
     border: 1px solid var(--green-soft);
 
@@ -508,12 +500,10 @@ body::before {
     background:
         rgba(80, 180, 105, 0.09);
 
-    border-color:
-        var(--border-bright);
+    border-color: var(--border-bright);
 
     box-shadow:
-        0 0 14px
-        rgba(140, 255, 170, 0.08);
+        0 0 14px rgba(140, 255, 170, 0.08);
 }
 
 
@@ -527,8 +517,7 @@ body::before {
 
 .process-button:focus-visible {
     outline:
-        1px solid
-        var(--green);
+        1px solid var(--green);
 
     outline-offset: 3px;
 }
@@ -551,8 +540,7 @@ body::before {
 
 
 .log-panel .panel-title {
-    flex:
-        0 0 38px;
+    flex: 0 0 36px;
 }
 
 
@@ -562,14 +550,12 @@ body::before {
 
     min-height: 0;
 
-    max-height: none;
-
     overflow-y: auto;
 
     padding:
-        7px
-        16px
-        10px;
+        6px
+        15px
+        8px;
 
     scrollbar-width: thin;
 
@@ -584,7 +570,7 @@ body::before {
 
     gap: 9px;
 
-    margin: 6px 0;
+    margin: 5px 0;
 
     color: var(--text);
 
@@ -599,8 +585,7 @@ body::before {
 .log-prefix {
     color: var(--green-soft);
 
-    flex:
-        0 0 auto;
+    flex: 0 0 auto;
 }
 
 
@@ -614,8 +599,7 @@ body::before {
    ========================================================= */
 
 .system-footer {
-    flex:
-        0 0 27px;
+    flex: 0 0 25px;
 
     display: flex;
 
@@ -624,7 +608,7 @@ body::before {
     align-items: flex-end;
 
     padding:
-        6px
+        5px
         2px
         0;
 
@@ -637,32 +621,32 @@ body::before {
 
 
 /* =========================================================
-   MOBILE / 9:16
+   MOBILE
    ========================================================= */
 
 @media (max-width: 600px) {
 
     .system {
         padding:
+            6px
             7px
-            8px
-            8px;
+            7px;
     }
 
 
     .system-header {
-        flex-basis: 55px;
+        flex-basis: 53px;
 
-        min-height: 55px;
+        min-height: 53px;
 
         padding:
-            9px
-            15px;
+            8px
+            14px;
     }
 
 
     .system-name {
-        font-size: 21px;
+        font-size: 20px;
 
         letter-spacing: 3px;
     }
@@ -676,16 +660,16 @@ body::before {
 
 
     .panel {
-        margin-top: 7px;
+        margin-top: 6px;
     }
 
 
     .panel-title {
-        min-height: 35px;
+        min-height: 34px;
 
         padding:
             0
-            15px;
+            14px;
 
         font-size: 10px;
 
@@ -694,11 +678,11 @@ body::before {
 
 
     .status-row {
-        min-height: 59px;
+        min-height: 56px;
 
         padding:
-            8px
-            11px;
+            7px
+            10px;
 
         gap: 5px;
     }
@@ -718,32 +702,32 @@ body::before {
 
     .process-content {
         padding:
+            13px
             14px
-            15px
-            15px;
+            14px;
     }
 
 
     .resource-label {
         font-size: 9px;
 
-        margin-bottom: 7px;
+        margin-bottom: 6px;
     }
 
 
     .resource-value {
-        font-size: 38px;
+        font-size: 37px;
 
         letter-spacing: 6px;
 
-        margin-bottom: 14px;
+        margin-bottom: 13px;
     }
 
 
     .process-button {
-        height: 58px;
+        height: 56px;
 
-        min-height: 58px;
+        min-height: 56px;
 
         font-size: 14px;
 
@@ -754,32 +738,42 @@ body::before {
     .system-log {
         padding:
             5px
-            13px
+            12px
             7px;
     }
 
 
     .log-line {
-        margin: 5px 0;
+        margin: 4px 0;
 
         font-size: 10px;
 
         line-height: 1.3;
-
-        gap: 7px;
     }
 
 
     .system-footer {
-        flex-basis: 23px;
+        flex-basis: 22px;
 
         font-size: 8px;
+    }
+
+
+    /* Keep language switcher centered */
+    .language-switcher {
+        top: 5px;
+
+        left: 50%;
+
+        right: auto;
+
+        transform: translateX(-50%);
     }
 }
 
 
 /* =========================================================
-   SHORT MOBILE SCREENS
+   SHORT MOBILE
    ========================================================= */
 
 @media (
@@ -791,19 +785,19 @@ body::before {
     .system {
         padding:
             5px
-            7px
+            6px
             6px;
     }
 
 
     .system-header {
-        flex-basis: 48px;
+        flex-basis: 47px;
 
-        min-height: 48px;
+        min-height: 47px;
 
         padding:
-            7px
-            12px;
+            6px
+            11px;
     }
 
 
@@ -818,18 +812,18 @@ body::before {
 
 
     .panel-title {
-        min-height: 30px;
+        min-height: 29px;
 
         font-size: 9px;
     }
 
 
     .status-row {
-        min-height: 51px;
+        min-height: 48px;
 
         padding:
-            6px
-            9px;
+            5px
+            8px;
     }
 
 
@@ -845,9 +839,9 @@ body::before {
 
     .process-content {
         padding:
-            10px
-            12px
-            11px;
+            9px
+            11px
+            10px;
     }
 
 
@@ -857,23 +851,23 @@ body::before {
 
 
     .resource-value {
-        font-size: 31px;
+        font-size: 30px;
 
-        margin-bottom: 9px;
+        margin-bottom: 8px;
     }
 
 
     .process-button {
-        height: 48px;
+        height: 46px;
 
-        min-height: 48px;
+        min-height: 46px;
 
-        font-size: 13px;
+        font-size: 12px;
     }
 
 
     .system-footer {
-        flex-basis: 19px;
+        flex-basis: 18px;
 
         font-size: 7px;
     }
@@ -888,7 +882,7 @@ body::before {
 
 
 /* =========================================================
-   VERY SHORT SCREENS
+   VERY SHORT MOBILE
    ========================================================= */
 
 @media (
@@ -898,15 +892,20 @@ body::before {
 ) {
 
     .language-switcher {
-        top: 5px;
-        right: 5px;
+        top: 3px;
+
+        left: 50%;
+
+        right: auto;
+
+        transform: translateX(-50%);
     }
 
 
     .language-button {
         min-width: 27px;
 
-        height: 22px;
+        height: 21px;
 
         padding:
             0
@@ -918,16 +917,16 @@ body::before {
 
     .system {
         padding:
-            4px
+            3px
             5px
             5px;
     }
 
 
     .system-header {
-        flex-basis: 42px;
+        flex-basis: 41px;
 
-        min-height: 42px;
+        min-height: 41px;
     }
 
 
@@ -944,18 +943,18 @@ body::before {
 
 
     .panel-title {
-        min-height: 26px;
+        min-height: 25px;
 
         font-size: 8px;
     }
 
 
     .status-row {
-        min-height: 43px;
+        min-height: 41px;
 
         padding:
-            5px
-            7px;
+            4px
+            6px;
     }
 
 
@@ -966,33 +965,33 @@ body::before {
 
     .process-content {
         padding:
-            7px
-            9px
-            8px;
+            6px
+            8px
+            7px;
     }
 
 
     .resource-value {
-        font-size: 27px;
+        font-size: 26px;
 
-        margin-bottom: 7px;
+        margin-bottom: 6px;
     }
 
 
     .process-button {
-        height: 42px;
+        height: 40px;
 
-        min-height: 42px;
+        min-height: 40px;
 
-        font-size: 11px;
+        font-size: 10px;
     }
 
 
     .system-log {
         padding:
             3px
-            9px
-            5px;
+            8px
+            4px;
     }
 
 
@@ -1004,7 +1003,7 @@ body::before {
 
 
     .system-footer {
-        flex-basis: 16px;
+        flex-basis: 15px;
 
         font-size: 6px;
     }
@@ -1026,15 +1025,15 @@ body::before {
 
         padding:
             4px
-            8px
+            7px
             5px;
     }
 
 
     .system-header {
-        flex-basis: 42px;
+        flex-basis: 41px;
 
-        min-height: 42px;
+        min-height: 41px;
     }
 
 
@@ -1044,32 +1043,32 @@ body::before {
 
 
     .panel-title {
-        min-height: 27px;
+        min-height: 26px;
     }
 
 
     .status-row {
-        min-height: 43px;
+        min-height: 41px;
     }
 
 
     .process-content {
         padding:
-            8px
-            12px;
+            7px
+            11px;
     }
 
 
     .resource-value {
-        font-size: 30px;
+        font-size: 29px;
 
-        margin-bottom: 8px;
+        margin-bottom: 7px;
     }
 
 
     .process-button {
-        height: 43px;
+        height: 41px;
 
-        min-height: 43px;
+        min-height: 41px;
     }
 }
