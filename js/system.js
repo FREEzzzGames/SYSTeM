@@ -145,15 +145,23 @@ const Process = {
 
 
 /* =========================================================
-   RADIO
+   RADIO ENGINE
+   =========================================================
+   Native HTML5 Audio
+   No iframe.
    ========================================================= */
 
 const Radio = {
 
-    streamURL:
-        "https://player.gtiradio.ru/?id=standart",
+    /*
+     * Official GTI Radio external stream.
+     */
 
-    iframe: null,
+    streamURL:
+        "https://gtiradio.ru/radiohi",
+
+
+    audio: null,
 
     playButton: null,
 
@@ -161,6 +169,10 @@ const Radio = {
 
     initialized: false,
 
+
+    /* -----------------------------------------------------
+       INIT
+       ----------------------------------------------------- */
 
     init() {
 
@@ -174,13 +186,20 @@ const Radio = {
 
         this.initialized = true;
 
+
         this.createControls();
 
+
         this.bindEvents();
+
 
         this.updateButtons();
     },
 
+
+    /* -----------------------------------------------------
+       CREATE CONTROLS
+       ----------------------------------------------------- */
 
     createControls() {
 
@@ -208,6 +227,18 @@ const Radio = {
             existing
         ) {
 
+            this.playButton =
+                document.getElementById(
+                    "radio-play"
+                );
+
+
+            this.stopButton =
+                document.getElementById(
+                    "radio-stop"
+                );
+
+
             return;
         }
 
@@ -233,6 +264,7 @@ const Radio = {
                 type="button"
                 aria-label="Play radio"
                 title="Play"
+                aria-pressed="false"
             >▶</button>
 
             <button
@@ -241,6 +273,7 @@ const Radio = {
                 type="button"
                 aria-label="Stop radio"
                 title="Stop"
+                aria-pressed="true"
             >■</button>
         `;
 
@@ -262,6 +295,10 @@ const Radio = {
             );
     },
 
+
+    /* -----------------------------------------------------
+       EVENTS
+       ----------------------------------------------------- */
 
     bindEvents() {
 
@@ -296,80 +333,219 @@ const Radio = {
     },
 
 
-    play() {
+    /* -----------------------------------------------------
+       CREATE AUDIO
+       ----------------------------------------------------- */
+
+    createAudio() {
 
         if (
-            this.iframe
+            this.audio
+        ) {
+
+            return this.audio;
+        }
+
+
+        const audio =
+            new Audio();
+
+
+        audio.src =
+            this.streamURL;
+
+
+        audio.preload =
+            "none";
+
+
+        audio.autoplay =
+            false;
+
+
+        audio.volume =
+            1;
+
+
+        /*
+         * Radio state events.
+         */
+
+        audio.addEventListener(
+            "playing",
+            () => {
+
+                this.updateButtons();
+
+
+                Debug.info(
+                    "Radio playback started"
+                );
+            }
+        );
+
+
+        audio.addEventListener(
+            "pause",
+            () => {
+
+                this.updateButtons();
+            }
+        );
+
+
+        audio.addEventListener(
+            "waiting",
+            () => {
+
+                Debug.info(
+                    "Radio buffering"
+                );
+            }
+        );
+
+
+        audio.addEventListener(
+            "stalled",
+            () => {
+
+                Debug.info(
+                    "Radio stream stalled"
+                );
+            }
+        );
+
+
+        audio.addEventListener(
+            "error",
+            () => {
+
+                this.updateButtons();
+
+
+                Debug.error(
+                    "Radio playback error",
+                    audio.error
+                );
+            }
+        );
+
+
+        this.audio =
+            audio;
+
+
+        return audio;
+    },
+
+
+    /* -----------------------------------------------------
+       PLAY
+       ----------------------------------------------------- */
+
+    async play() {
+
+        const audio =
+            this.createAudio();
+
+
+        if (
+            !audio
         ) {
 
             return;
         }
 
 
-        const iframe =
-            document.createElement(
-                "iframe"
+        /*
+         * If already playing,
+         * do nothing.
+         */
+
+        if (
+            !audio.paused
+        ) {
+
+            return;
+        }
+
+
+        try {
+
+            /*
+             * The call is made directly
+             * from the user's button action.
+             */
+
+            await audio.play();
+
+
+            this.updateButtons();
+
+
+            Debug.info(
+                "Radio play confirmed"
             );
 
+        } catch (error) {
 
-        iframe.src =
-            this.streamURL;
-
-
-        iframe.title =
-            "SYSTeM Radio";
+            this.updateButtons();
 
 
-        iframe.setAttribute(
-            "allow",
-            "autoplay"
-        );
-
-
-        iframe.setAttribute(
-            "frameborder",
-            "0"
-        );
-
-
-        iframe.setAttribute(
-            "scrolling",
-            "no"
-        );
-
-
-        iframe.className =
-            "radio-iframe";
-
-
-        this.iframe =
-            iframe;
-
-
-        document.body.appendChild(
-            iframe
-        );
-
-
-        this.updateButtons();
-
-
-        Debug.info(
-            "Radio play requested"
-        );
+            Debug.error(
+                "Radio play failed",
+                error
+            );
+        }
     },
 
+
+    /* -----------------------------------------------------
+       STOP
+       ----------------------------------------------------- */
 
     stop() {
 
         if (
-            this.iframe
+            !this.audio
         ) {
 
-            this.iframe.remove();
+            this.updateButtons();
 
-            this.iframe = null;
+            return;
         }
+
+
+        this.audio.pause();
+
+
+        /*
+         * Reset the stream so that
+         * the next PLAY starts a
+         * fresh connection.
+         */
+
+        try {
+
+            this.audio.removeAttribute(
+                "src"
+            );
+
+
+            this.audio.load();
+
+        } catch (
+            error
+        ) {
+
+            Debug.error(
+                "Radio reset failed",
+                error
+            );
+        }
+
+
+        this.audio = null;
 
 
         this.updateButtons();
@@ -380,6 +556,10 @@ const Radio = {
         );
     },
 
+
+    /* -----------------------------------------------------
+       BUTTON STATE
+       ----------------------------------------------------- */
 
     updateButtons() {
 
@@ -394,7 +574,8 @@ const Radio = {
 
         const playing =
             Boolean(
-                this.iframe
+                this.audio &&
+                !this.audio.paused
             );
 
 
@@ -668,12 +849,9 @@ const UI = {
 
 
                 /*
-                 * Important:
-                 * The log stores the translation KEY,
-                 * not the translated text.
-                 *
-                 * Therefore changing language
-                 * immediately updates old messages too.
+                 * The log stores the
+                 * translation KEY,
+                 * not translated text.
                  */
 
                 text.textContent =
