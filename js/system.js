@@ -1,7 +1,7 @@
 /* =========================================================
    SYSTeM
-   CORE v0.1.0
-   Core Foundation
+   CORE v0.1.1
+   ECONOMY FOUNDATION
    ========================================================= */
 
 
@@ -13,7 +13,7 @@ const SYSTEM_CONFIG = {
 
     name: "SYSTeM",
 
-    version: "0.1.0",
+    version: "0.1.1",
 
     module: "CORE",
 
@@ -21,7 +21,21 @@ const SYSTEM_CONFIG = {
 
     resourceStep: 1,
 
-    maxLogEntries: 50
+    maxLogEntries: 50,
+
+    /* -----------------------------------------------------
+       ECONOMY
+       ----------------------------------------------------- */
+
+    initialCredits: 0,
+
+    initialEfficiency: 1,
+
+    initialUpgradeCost: 10,
+
+    upgradeCostMultiplier: 1.5,
+
+    resourceToCredits: 1
 };
 
 
@@ -33,6 +47,15 @@ const State = {
 
     resource:
         SYSTEM_CONFIG.initialResource,
+
+    credits:
+        SYSTEM_CONFIG.initialCredits,
+
+    efficiency:
+        SYSTEM_CONFIG.initialEfficiency,
+
+    upgradeCost:
+        SYSTEM_CONFIG.initialUpgradeCost,
 
     ready: true,
 
@@ -54,16 +77,246 @@ const Resources = {
 
     add(amount) {
 
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount)
+        ) {
+
+            return State.resource;
+        }
+
+
         State.resource += amount;
 
         return State.resource;
     },
 
 
+    spend(amount) {
+
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount) ||
+            amount < 0
+        ) {
+
+            return false;
+        }
+
+
+        if (
+            State.resource < amount
+        ) {
+
+            return false;
+        }
+
+
+        State.resource -= amount;
+
+        return true;
+    },
+
+
     format(value) {
 
-        return String(value)
-            .padStart(6, "0");
+        return String(
+            Math.floor(value)
+        ).padStart(
+            6,
+            "0"
+        );
+    }
+};
+
+
+/* =========================================================
+   CREDIT ENGINE
+   ========================================================= */
+
+const Credits = {
+
+    get() {
+
+        return State.credits;
+    },
+
+
+    add(amount) {
+
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount)
+        ) {
+
+            return State.credits;
+        }
+
+
+        State.credits += amount;
+
+        return State.credits;
+    },
+
+
+    spend(amount) {
+
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount) ||
+            amount < 0
+        ) {
+
+            return false;
+        }
+
+
+        if (
+            State.credits < amount
+        ) {
+
+            return false;
+        }
+
+
+        State.credits -= amount;
+
+        return true;
+    },
+
+
+    format(value) {
+
+        return String(
+            Math.floor(value)
+        ).padStart(
+            6,
+            "0"
+        );
+    }
+};
+
+
+/* =========================================================
+   ECONOMY ENGINE
+   ========================================================= */
+
+const Economy = {
+
+    /* -----------------------------------------------------
+       RESOURCE → CREDITS
+       ----------------------------------------------------- */
+
+    convertResourceToCredits(amount) {
+
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount) ||
+            amount <= 0
+        ) {
+
+            return 0;
+        }
+
+
+        const credits =
+            amount *
+            SYSTEM_CONFIG.resourceToCredits;
+
+
+        Credits.add(
+            credits
+        );
+
+
+        return credits;
+    },
+
+
+    /* -----------------------------------------------------
+       CURRENT PRODUCTION VALUE
+       ----------------------------------------------------- */
+
+    getProductionAmount() {
+
+        return (
+            SYSTEM_CONFIG.resourceStep *
+            State.efficiency
+        );
+    },
+
+
+    /* -----------------------------------------------------
+       UPGRADE
+       ----------------------------------------------------- */
+
+    canUpgrade() {
+
+        return (
+            State.credits >=
+            State.upgradeCost
+        );
+    },
+
+
+    upgrade() {
+
+        if (
+            !this.canUpgrade()
+        ) {
+
+            return false;
+        }
+
+
+        const cost =
+            State.upgradeCost;
+
+
+        if (
+            !Credits.spend(cost)
+        ) {
+
+            return false;
+        }
+
+
+        State.efficiency += 1;
+
+
+        State.upgradeCost =
+            Math.ceil(
+                State.upgradeCost *
+                SYSTEM_CONFIG.upgradeCostMultiplier
+            );
+
+
+        Log.add(
+            "log.upgradeComplete"
+        );
+
+
+        UI.renderEconomy();
+
+
+        Debug.info(
+            "Efficiency upgraded",
+            {
+
+                efficiency:
+                    State.efficiency,
+
+                nextCost:
+                    State.upgradeCost,
+
+                credits:
+                    State.credits
+
+            }
+        );
+
+
+        return true;
     }
 };
 
@@ -97,7 +350,12 @@ const Log = {
         }
 
 
-        UI.renderLog();
+        if (
+            typeof UI !== "undefined"
+        ) {
+
+            UI.renderLog();
+        }
     },
 
 
@@ -118,8 +376,17 @@ const Process = {
 
     execute() {
 
+        const amount =
+            Economy.getProductionAmount();
+
+
         Resources.add(
-            SYSTEM_CONFIG.resourceStep
+            amount
+        );
+
+
+        Economy.convertResourceToCredits(
+            amount
         );
 
 
@@ -130,169 +397,23 @@ const Process = {
 
         UI.renderResource();
 
+        UI.renderEconomy();
+
 
         Debug.info(
             "Process executed",
             {
 
                 resource:
-                    State.resource
+                    State.resource,
+
+                credits:
+                    State.credits,
+
+                efficiency:
+                    State.efficiency
 
             }
-        );
-    }
-};
-
-
-/* =========================================================
-   RADIO BUTTONS
-   VISUAL ONLY
-   =========================================================
-   
-   IMPORTANT:
-   No audio.
-   No iframe.
-   No external stream.
-   No radio initialization.
-   No click handlers.
-   
-   These buttons are only placeholders.
-   The real Radio module will be connected later.
-   ========================================================= */
-
-const RadioButtons = {
-
-    initialized: false,
-
-
-    init() {
-
-        if (
-            this.initialized
-        ) {
-
-            return;
-        }
-
-
-        const switcher =
-            document.getElementById(
-                "language-switcher"
-            );
-
-
-        if (
-            !switcher
-        ) {
-
-            return;
-        }
-
-
-        this.initialized = true;
-
-
-        /*
-         * Prevent duplicate buttons.
-         */
-
-        if (
-            document.getElementById(
-                "radio-play"
-            )
-        ) {
-
-            return;
-        }
-
-
-        const play =
-            document.createElement(
-                "button"
-            );
-
-
-        play.id =
-            "radio-play";
-
-
-        play.className =
-            "radio-button";
-
-
-        play.type =
-            "button";
-
-
-        play.textContent =
-            "▶";
-
-
-        play.setAttribute(
-            "aria-label",
-            "Radio"
-        );
-
-
-        play.setAttribute(
-            "title",
-            "Radio"
-        );
-
-
-        const stop =
-            document.createElement(
-                "button"
-            );
-
-
-        stop.id =
-            "radio-stop";
-
-
-        stop.className =
-            "radio-button";
-
-
-        stop.type =
-            "button";
-
-
-        stop.textContent =
-            "■";
-
-
-        stop.setAttribute(
-            "aria-label",
-            "Radio stop"
-        );
-
-
-        stop.setAttribute(
-            "title",
-            "Radio stop"
-        );
-
-
-        /*
-         * VISUAL ONLY.
-         *
-         * No event listeners are attached.
-         *
-         * Therefore these buttons cannot:
-         * - start audio
-         * - load an iframe
-         * - open another page
-         * - change the game state
-         */
-
-        switcher.appendChild(
-            play
-        );
-
-
-        switcher.appendChild(
-            stop
         );
     }
 };
@@ -318,32 +439,30 @@ const Game = {
             true;
 
 
-        /*
-         * Initialize localization
-         * before rendering anything.
-         */
+        /* -------------------------------------------------
+           INITIALIZE LOCALIZATION
+           ------------------------------------------------- */
 
         SYSTEM_I18N.init();
 
 
-        /*
-         * Initialize global language
-         * switcher.
-         */
+        /* -------------------------------------------------
+           INITIALIZE LANGUAGE SWITCHER
+           ------------------------------------------------- */
 
         SYSTEM_LANGUAGE_SWITCHER.init();
 
 
-        /*
-         * Initialize UI.
-         */
+        /* -------------------------------------------------
+           INITIALIZE UI
+           ------------------------------------------------- */
 
         UI.bindEvents();
 
 
-        /*
-         * Initial system messages.
-         */
+        /* -------------------------------------------------
+           INITIAL SYSTEM MESSAGES
+           ------------------------------------------------- */
 
         Log.add(
             "log.systemInitialized"
@@ -355,21 +474,11 @@ const Game = {
         );
 
 
-        /*
-         * Render.
-         */
+        /* -------------------------------------------------
+           RENDER
+           ------------------------------------------------- */
 
         UI.render();
-
-
-        /*
-         * Add only the visual
-         * radio buttons.
-         *
-         * No radio engine exists yet.
-         */
-
-        RadioButtons.init();
 
 
         Debug.info(
@@ -459,6 +568,8 @@ const UI = {
 
         this.renderResource();
 
+        this.renderEconomy();
+
         SYSTEM_I18N.apply();
 
         this.renderLog();
@@ -485,6 +596,30 @@ const UI = {
             Resources.format(
                 Resources.get()
             );
+    },
+
+
+    /* -----------------------------------------------------
+       ECONOMY
+       ----------------------------------------------------- */
+
+    renderEconomy() {
+
+        /*
+         * Economy is intentionally not added
+         * to the visible interface yet.
+         *
+         * This keeps the current geometry
+         * completely unchanged.
+         *
+         * The values remain available through:
+         *
+         * SYSTEM.credits
+         * SYSTEM.state.efficiency
+         * SYSTEM.economy
+         */
+
+        return;
     },
 
 
@@ -544,12 +679,8 @@ const UI = {
 
 
                 /*
-                 * The log stores the
-                 * translation KEY,
+                 * The log stores translation keys,
                  * not translated text.
-                 *
-                 * Therefore changing language
-                 * immediately updates old messages.
                  */
 
                 text.textContent =
@@ -658,6 +789,12 @@ window.SYSTEM = {
     resources:
         Resources,
 
+    credits:
+        Credits,
+
+    economy:
+        Economy,
+
     process:
         Process,
 
@@ -669,9 +806,6 @@ window.SYSTEM = {
 
     ui:
         UI,
-
-    radioButtons:
-        RadioButtons,
 
     debug:
         Debug,
