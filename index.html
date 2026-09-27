@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -14,9 +16,56 @@
 
 <body>
 
+    <!-- =====================================================
+         GLOBAL LANGUAGE SWITCHER
+         Always above all screens
+         ===================================================== -->
+
+    <div
+        id="language-switcher"
+        class="language-switcher"
+        role="group"
+        aria-label="Language"
+    >
+
+        <button
+            type="button"
+            class="language-button active"
+            data-language="ru"
+            aria-label="Русский"
+        >
+            RU
+        </button>
+
+        <button
+            type="button"
+            class="language-button"
+            data-language="de"
+            aria-label="Deutsch"
+        >
+            DE
+        </button>
+
+        <button
+            type="button"
+            class="language-button"
+            data-language="en"
+            aria-label="English"
+        >
+            EN
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN SYSTEM
+         ===================================================== -->
+
     <main class="system">
 
         <!-- HEADER -->
+
         <header class="system-header">
 
             <div class="system-name">
@@ -24,91 +73,133 @@
             </div>
 
             <div class="system-meta">
+
                 <div class="version">
                     CORE v0.1.0
                 </div>
 
                 <div class="online">
+
                     <span class="status-dot"></span>
-                    <span data-i18n="header.online">ONLINE</span>
+
+                    <span data-i18n="header.online">
+                        ОНЛАЙН
+                    </span>
+
                 </div>
+
             </div>
 
         </header>
 
 
         <!-- SYSTEM STATUS -->
+
         <section class="panel status-panel">
 
-            <div class="panel-title" data-i18n="status.title">
-                SYSTEM STATUS
+            <div
+                class="panel-title"
+                data-i18n="status.title"
+            >
+                СТАТУС СИСТЕМЫ
             </div>
 
+
             <div class="status-row">
-                <div class="status-label" data-i18n="status.status">
-                    STATUS
+
+                <div
+                    class="status-label"
+                    data-i18n="status.status"
+                >
+                    СТАТУС
                 </div>
 
-                <div class="status-value" data-i18n="status.online">
-                    ONLINE
+                <div
+                    class="status-value"
+                    data-i18n="status.online"
+                >
+                    ОНЛАЙН
                 </div>
+
             </div>
 
+
             <div class="status-row">
-                <div class="status-label" data-i18n="status.user">
-                    USER
+
+                <div
+                    class="status-label"
+                    data-i18n="status.user"
+                >
+                    ПОЛЬЗОВАТЕЛЬ
                 </div>
 
                 <div
                     class="status-value"
                     data-i18n="status.unknown"
                 >
-                    UNKNOWN
+                    НЕИЗВЕСТНО
                 </div>
+
             </div>
 
+
             <div class="status-row">
-                <div class="status-label" data-i18n="status.purpose">
-                    PURPOSE
+
+                <div
+                    class="status-label"
+                    data-i18n="status.purpose"
+                >
+                    НАЗНАЧЕНИЕ
                 </div>
 
                 <div
                     class="status-value"
                     data-i18n="status.unknown"
                 >
-                    UNKNOWN
+                    НЕИЗВЕСТНО
                 </div>
+
             </div>
 
         </section>
 
 
         <!-- PROCESS -->
+
         <section class="panel process-panel">
 
-            <div class="panel-title" data-i18n="process.title">
-                PROCESS
+            <div
+                class="panel-title"
+                data-i18n="process.title"
+            >
+                ПРОЦЕСС
             </div>
+
 
             <div class="process-content">
 
-                <div class="resource-label" data-i18n="process.resource">
-                    RESOURCE
+                <div
+                    class="resource-label"
+                    data-i18n="process.resource"
+                >
+                    РЕСУРС
                 </div>
+
 
                 <div
                     id="resource-value"
                     class="resource-value"
                 >
-                    000005
+                    000000
                 </div>
+
 
                 <button
                     id="process-button"
                     class="process-button"
                     type="button"
                 >
-                    [ PROCESS ]
+                    [ ЗАПУСК ]
                 </button>
 
             </div>
@@ -117,24 +208,29 @@
 
 
         <!-- SYSTEM LOG -->
+
         <section class="panel log-panel">
 
-            <div class="panel-title" data-i18n="log.title">
-                SYSTEM LOG
+            <div
+                class="panel-title"
+                data-i18n="log.title"
+            >
+                СИСТЕМНЫЙ ЖУРНАЛ
             </div>
+
 
             <div
                 id="system-log"
                 class="system-log"
                 aria-live="polite"
             >
-                <!-- Logs inserted by JS -->
             </div>
 
         </section>
 
 
         <!-- FOOTER -->
+
         <footer class="system-footer">
 
             <div>
@@ -142,7 +238,7 @@
             </div>
 
             <div data-i18n="footer.ready">
-                STATE: READY
+                СОСТОЯНИЕ: ГОТОВО
             </div>
 
         </footer>
@@ -150,11 +246,14 @@
     </main>
 
 
-    <!-- LANGUAGE DATA -->
+    <!-- LOCALIZATION -->
+
     <script src="js/locales.js"></script>
 
     <!-- SYSTEM CORE -->
+
     <script src="js/system.js"></script>
 
 </body>
+
 </html>
