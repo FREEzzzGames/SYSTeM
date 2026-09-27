@@ -1,7 +1,7 @@
 /* =========================================================
    SYSTeM
-   CORE v0.1.2
-   Economy + Upgrade
+   CORE v0.1.3
+   Economy + Upgrade + Auto Save
    ========================================================= */
 
 
@@ -15,7 +15,7 @@ const SYSTEM_CONFIG = {
         "SYSTeM",
 
     version:
-        "0.1.2",
+        "0.1.3",
 
     module:
         "CORE",
@@ -73,6 +73,207 @@ const State = {
 
 
 /* =========================================================
+   AUTO SAVE
+   ========================================================= */
+
+const SAVE_KEY =
+    "system.save.v1";
+
+const Save = {
+
+    intervalId:
+        null,
+
+
+    save() {
+
+        try {
+
+            const payload = {
+
+                version:
+                    1,
+
+                resource:
+                    State.resource,
+
+                credits:
+                    State.credits,
+
+                efficiency:
+                    State.efficiency,
+
+                upgradeCost:
+                    State.upgradeCost,
+
+                savedAt:
+                    Date.now()
+            };
+
+
+            localStorage.setItem(
+                SAVE_KEY,
+                JSON.stringify(payload)
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            Debug.error(
+                "Save failed",
+                error
+            );
+
+            return false;
+        }
+    },
+
+
+    load() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    SAVE_KEY
+                );
+
+
+            if (!raw) {
+
+                return false;
+            }
+
+
+            const data =
+                JSON.parse(raw);
+
+
+            if (
+                !data ||
+                data.version !== 1
+            ) {
+
+                return false;
+            }
+
+
+            State.resource =
+                Math.max(
+                    0,
+                    Number(data.resource) || 0
+                );
+
+
+            State.credits =
+                Math.max(
+                    0,
+                    Number(data.credits) || 0
+                );
+
+
+            State.efficiency =
+                Math.max(
+                    1,
+                    Number(data.efficiency) || 1
+                );
+
+
+            State.upgradeCost =
+                Math.max(
+                    1,
+                    Number(data.upgradeCost) ||
+                        SYSTEM_CONFIG.initialUpgradeCost
+                );
+
+
+            return true;
+
+        } catch (error) {
+
+            Debug.error(
+                "Load failed",
+                error
+            );
+
+            return false;
+        }
+    },
+
+
+    startAutoSave() {
+
+        if (
+            this.intervalId !== null
+        ) {
+
+            return;
+        }
+
+
+        this.intervalId =
+            window.setInterval(
+                () => {
+
+                    this.save();
+
+                },
+                10000
+            );
+    },
+
+
+    stopAutoSave() {
+
+        if (
+            this.intervalId === null
+        ) {
+
+            return;
+        }
+
+
+        window.clearInterval(
+            this.intervalId
+        );
+
+
+        this.intervalId =
+            null;
+    },
+
+
+    bindPageEvents() {
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (
+                    document.visibilityState ===
+                    "hidden"
+                ) {
+
+                    this.save();
+                }
+            }
+        );
+
+
+        window.addEventListener(
+            "pagehide",
+            () => {
+
+                this.save();
+            }
+        );
+    }
+};
+
+
+/* =========================================================
    RESOURCE ENGINE
    ========================================================= */
 
@@ -101,6 +302,7 @@ const Resources = {
 
             return false;
         }
+
 
         State.resource -= amount;
 
@@ -149,6 +351,7 @@ const Credits = {
 
             return false;
         }
+
 
         State.credits -= amount;
 
@@ -233,6 +436,9 @@ const Economy = {
 
 
         UI.renderEconomy();
+
+
+        Save.save();
 
 
         Debug.info(
@@ -343,7 +549,11 @@ const Process = {
 
         UI.renderResource();
 
+
         UI.renderEconomy();
+
+
+        Save.save();
 
 
         Debug.info(
@@ -383,6 +593,15 @@ const Game = {
 
         State.initialized =
             true;
+
+
+        /*
+         * Restore saved game state
+         * before rendering.
+         */
+
+        const restored =
+            Save.load();
 
 
         /*
@@ -427,6 +646,15 @@ const Game = {
         UI.render();
 
 
+        /*
+         * Start Auto Save.
+         */
+
+        Save.startAutoSave();
+
+        Save.bindPageEvents();
+
+
         Debug.info(
             "SYSTeM boot complete",
             {
@@ -435,7 +663,10 @@ const Game = {
                     SYSTEM_CONFIG.version,
 
                 language:
-                    SYSTEM_I18N.currentLanguage
+                    SYSTEM_I18N.currentLanguage,
+
+                restored:
+                    restored
 
             }
         );
@@ -1007,7 +1238,7 @@ const UI = {
         );
 
 
-        this.logElement.scrollTop =
+                this.logElement.scrollTop =
             this.logElement.scrollHeight;
     }
 };
@@ -1098,6 +1329,9 @@ window.SYSTEM = {
 
     economy:
         Economy,
+
+    save:
+        Save,
 
     process:
         Process,
