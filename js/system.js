@@ -1,7 +1,7 @@
 /* =========================================================
    SYSTeM
    CORE v0.1.2
-   ECONOMY + FIRST UPGRADE
+   Economy + Upgrade
    ========================================================= */
 
 
@@ -11,29 +11,38 @@
 
 const SYSTEM_CONFIG = {
 
-    name: "SYSTeM",
+    name:
+        "SYSTeM",
 
-    version: "0.1.2",
+    version:
+        "0.1.2",
 
-    module: "CORE",
+    module:
+        "CORE",
 
-    initialResource: 0,
+    initialResource:
+        0,
 
-    resourceStep: 1,
+    resourceStep:
+        1,
 
-    maxLogEntries: 50,
+    maxLogEntries:
+        50,
 
-    /* ECONOMY */
+    initialCredits:
+        0,
 
-    initialCredits: 0,
+    initialEfficiency:
+        1,
 
-    initialEfficiency: 1,
+    initialUpgradeCost:
+        10,
 
-    initialUpgradeCost: 10,
+    upgradeCostMultiplier:
+        1.5,
 
-    upgradeCostMultiplier: 1.5,
-
-    resourceToCredits: 1
+    resourceToCredits:
+        1
 };
 
 
@@ -55,9 +64,11 @@ const State = {
     upgradeCost:
         SYSTEM_CONFIG.initialUpgradeCost,
 
-    ready: true,
+    ready:
+        true,
 
-    initialized: false
+    initialized:
+        false
 };
 
 
@@ -75,15 +86,6 @@ const Resources = {
 
     add(amount) {
 
-        if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount)
-        ) {
-
-            return State.resource;
-        }
-
-
         State.resource += amount;
 
         return State.resource;
@@ -93,22 +95,12 @@ const Resources = {
     spend(amount) {
 
         if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount) ||
-            amount < 0
-        ) {
-
-            return false;
-        }
-
-
-        if (
+            amount <= 0 ||
             State.resource < amount
         ) {
 
             return false;
         }
-
 
         State.resource -= amount;
 
@@ -142,15 +134,6 @@ const Credits = {
 
     add(amount) {
 
-        if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount)
-        ) {
-
-            return State.credits;
-        }
-
-
         State.credits += amount;
 
         return State.credits;
@@ -160,22 +143,12 @@ const Credits = {
     spend(amount) {
 
         if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount) ||
-            amount < 0
-        ) {
-
-            return false;
-        }
-
-
-        if (
+            amount <= 0 ||
             State.credits < amount
         ) {
 
             return false;
         }
-
 
         State.credits -= amount;
 
@@ -228,13 +201,11 @@ const Economy = {
             Debug.info(
                 "Upgrade unavailable",
                 {
-
                     credits:
                         State.credits,
 
-                    required:
+                    cost:
                         State.upgradeCost
-
                 }
             );
 
@@ -242,18 +213,13 @@ const Economy = {
         }
 
 
-        const cost =
+        const oldCost =
             State.upgradeCost;
 
 
-        const spent =
-            Credits.spend(cost);
-
-
-        if (!spent) {
-
-            return false;
-        }
+        Credits.spend(
+            oldCost
+        );
 
 
         State.efficiency += 1;
@@ -261,7 +227,7 @@ const Economy = {
 
         State.upgradeCost =
             Math.ceil(
-                State.upgradeCost *
+                oldCost *
                 SYSTEM_CONFIG.upgradeCostMultiplier
             );
 
@@ -272,21 +238,34 @@ const Economy = {
         Debug.info(
             "Efficiency upgraded",
             {
-
                 efficiency:
                     State.efficiency,
 
                 nextCost:
-                    State.upgradeCost,
-
-                credits:
-                    State.credits
-
+                    State.upgradeCost
             }
         );
 
 
         return true;
+    },
+
+
+    convertResourceToCredits(
+        amount
+    ) {
+
+        const credits =
+            amount *
+            SYSTEM_CONFIG.resourceToCredits;
+
+
+        Credits.add(
+            credits
+        );
+
+
+        return credits;
     }
 };
 
@@ -322,12 +301,7 @@ const Log = {
         }
 
 
-        if (
-            typeof UI !== "undefined"
-        ) {
-
-            UI.renderLog();
-        }
+        UI.renderLog();
     },
 
 
@@ -392,37 +366,6 @@ const Process = {
 
 
 /* =========================================================
-   ECONOMY CONVERSION
-   ========================================================= */
-
-Economy.convertResourceToCredits =
-    function(amount) {
-
-        if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount) ||
-            amount <= 0
-        ) {
-
-            return 0;
-        }
-
-
-        const credits =
-            amount *
-            SYSTEM_CONFIG.resourceToCredits;
-
-
-        Credits.add(
-            credits
-        );
-
-
-        return credits;
-    };
-
-
-/* =========================================================
    GAME
    ========================================================= */
 
@@ -442,22 +385,30 @@ const Game = {
             true;
 
 
-        /* LOCALIZATION */
+        /*
+         * Localization
+         */
 
         SYSTEM_I18N.init();
 
 
-        /* LANGUAGE SWITCHER */
+        /*
+         * Global language switcher
+         */
 
         SYSTEM_LANGUAGE_SWITCHER.init();
 
 
-        /* UI */
+        /*
+         * UI
+         */
 
         UI.bindEvents();
 
 
-        /* INITIAL LOG */
+        /*
+         * Initial system messages
+         */
 
         Log.add(
             "log.systemInitialized"
@@ -469,7 +420,9 @@ const Game = {
         );
 
 
-        /* RENDER */
+        /*
+         * Initial render
+         */
 
         UI.render();
 
@@ -521,9 +474,9 @@ const UI = {
         null,
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        CACHE DOM
-       ===================================================== */
+       ----------------------------------------------------- */
 
     cache() {
 
@@ -546,9 +499,9 @@ const UI = {
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        EVENTS
-       ===================================================== */
+       ----------------------------------------------------- */
 
     bindEvents() {
 
@@ -571,9 +524,9 @@ const UI = {
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        COMPLETE RENDER
-       ===================================================== */
+       ----------------------------------------------------- */
 
     render() {
 
@@ -591,9 +544,9 @@ const UI = {
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        RESOURCE
-       ===================================================== */
+       ----------------------------------------------------- */
 
     renderResource() {
 
@@ -612,9 +565,9 @@ const UI = {
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        ECONOMY UI
-       ===================================================== */
+       ----------------------------------------------------- */
 
     ensureEconomyUI() {
 
@@ -644,13 +597,17 @@ const UI = {
             !processPanel
         ) {
 
-            Debug.info(
-                "Economy UI target not found"
+            Debug.error(
+                "Process panel not found"
             );
 
             return;
         }
 
+
+        /*
+         * Main economy container
+         */
 
         const panel =
             document.createElement(
@@ -662,133 +619,198 @@ const UI = {
             "system-economy";
 
 
+        /*
+         * Keep the existing visual language.
+         * No external CSS is required.
+         */
+
         panel.style.marginTop =
-            "10px";
-
-
-        panel.style.padding =
             "8px";
 
+        panel.style.padding =
+            "6px 8px";
 
         panel.style.border =
-            "1px solid rgba(0,255,120,0.25)";
+            "1px solid rgba(80,255,140,.20)";
 
+        panel.style.background =
+            "rgba(0,20,10,.18)";
 
         panel.style.fontFamily =
             "inherit";
 
-
         panel.style.fontSize =
-            "12px";
+            "9px";
+
+        panel.style.letterSpacing =
+            "2px";
 
 
-        panel.style.lineHeight =
-            "1.6";
+        /*
+         * CREDITS
+         */
 
-
-        panel.style.textAlign =
-            "left";
-
-
-        panel.style.boxSizing =
-            "border-box";
-
-
-        const credits =
+        const creditsRow =
             document.createElement(
                 "div"
             );
 
+        creditsRow.style.marginBottom =
+            "4px";
 
-        credits.innerHTML =
-            "CREDITS: <span></span>";
+
+        const creditsLabel =
+            document.createElement(
+                "span"
+            );
+
+        creditsLabel.dataset.i18n =
+            "economy.credits";
 
 
         this.creditsElement =
-            credits.querySelector(
+            document.createElement(
                 "span"
             );
 
+        this.creditsElement.style.marginLeft =
+            "8px";
 
-        const efficiency =
+
+        creditsRow.appendChild(
+            creditsLabel
+        );
+
+        creditsRow.appendChild(
+            this.creditsElement
+        );
+
+
+        /*
+         * EFFICIENCY
+         */
+
+        const efficiencyRow =
             document.createElement(
                 "div"
             );
 
+        efficiencyRow.style.marginBottom =
+            "4px";
 
-        efficiency.innerHTML =
-            "EFFICIENCY: x<span></span>";
+
+        const efficiencyLabel =
+            document.createElement(
+                "span"
+            );
+
+        efficiencyLabel.dataset.i18n =
+            "economy.efficiency";
 
 
         this.efficiencyElement =
-            efficiency.querySelector(
+            document.createElement(
                 "span"
             );
 
+        this.efficiencyElement.style.marginLeft =
+            "8px";
 
-        const cost =
+
+        efficiencyRow.appendChild(
+            efficiencyLabel
+        );
+
+        efficiencyRow.appendChild(
+            this.efficiencyElement
+        );
+
+
+        /*
+         * NEXT UPGRADE
+         */
+
+        const upgradeRow =
             document.createElement(
                 "div"
             );
 
+        upgradeRow.style.marginBottom =
+            "6px";
 
-        cost.innerHTML =
-            "NEXT UPGRADE: <span></span>";
 
-
-        this.upgradeCostElement =
-            cost.querySelector(
+        const upgradeLabel =
+            document.createElement(
                 "span"
             );
 
+        upgradeLabel.dataset.i18n =
+            "economy.nextUpgrade";
 
-        const button =
+
+        this.upgradeCostElement =
+            document.createElement(
+                "span"
+            );
+
+        this.upgradeCostElement.style.marginLeft =
+            "8px";
+
+
+        upgradeRow.appendChild(
+            upgradeLabel
+        );
+
+        upgradeRow.appendChild(
+            this.upgradeCostElement
+        );
+
+
+        /*
+         * UPGRADE BUTTON
+         */
+
+        this.upgradeButton =
             document.createElement(
                 "button"
             );
 
 
-        button.type =
+        this.upgradeButton.type =
             "button";
 
 
-        button.textContent =
-            "[ UPGRADE ]";
+        this.upgradeButton.className =
+            "process-button";
 
 
-        button.style.marginTop =
-            "6px";
+        this.upgradeButton.dataset.i18n =
+            "economy.upgrade";
 
 
-        button.style.width =
+        this.upgradeButton.style.width =
             "100%";
 
+        this.upgradeButton.style.height =
+            "30px";
 
-        button.style.padding =
-            "6px";
+        this.upgradeButton.style.minHeight =
+            "30px";
 
+        this.upgradeButton.style.margin =
+            "0";
 
-        button.style.background =
-            "transparent";
-
-
-        button.style.color =
+        this.upgradeButton.style.fontFamily =
             "inherit";
 
+        this.upgradeButton.style.fontSize =
+            "9px";
 
-        button.style.border =
-            "1px solid currentColor";
-
-
-        button.style.fontFamily =
-            "inherit";
+        this.upgradeButton.style.letterSpacing =
+            "2px";
 
 
-        button.style.cursor =
-            "pointer";
-
-
-        button.addEventListener(
+        this.upgradeButton.addEventListener(
             "click",
             () => {
 
@@ -798,27 +820,24 @@ const UI = {
         );
 
 
-        this.upgradeButton =
-            button;
-
+        /*
+         * Assemble
+         */
 
         panel.appendChild(
-            credits
+            creditsRow
         );
 
-
         panel.appendChild(
-            efficiency
+            efficiencyRow
         );
 
-
         panel.appendChild(
-            cost
+            upgradeRow
         );
 
-
         panel.appendChild(
-            button
+            this.upgradeButton
         );
 
 
@@ -832,9 +851,9 @@ const UI = {
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        ECONOMY RENDER
-       ===================================================== */
+       ----------------------------------------------------- */
 
     renderEconomy() {
 
@@ -865,6 +884,7 @@ const UI = {
         ) {
 
             this.efficiencyElement.textContent =
+                "x" +
                 State.efficiency;
         }
 
@@ -895,20 +915,20 @@ const UI = {
             this.upgradeButton.style.opacity =
                 available
                     ? "1"
-                    : "0.45";
+                    : "0.35";
 
 
             this.upgradeButton.style.cursor =
                 available
                     ? "pointer"
-                    : "not-allowed";
+                    : "default";
         }
     },
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        LOG
-       ===================================================== */
+       ----------------------------------------------------- */
 
     renderLog() {
 
@@ -960,6 +980,11 @@ const UI = {
                 text.className =
                     "log-text";
 
+
+                /*
+                 * Store translation KEY,
+                 * not translated text.
+                 */
 
                 text.textContent =
                     t(entry.key);
@@ -1106,7 +1131,9 @@ document.addEventListener(
 
             Game.boot();
 
-        } catch (error) {
+        } catch (
+            error
+        ) {
 
             Debug.error(
                 "Boot failure",
