@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
     <title>SYSTeM</title>
 
@@ -11,55 +14,85 @@
 
 <body>
 
-    <main id="system">
+    <main class="system">
 
+        <!-- HEADER -->
         <header class="system-header">
-            <div class="brand">SYSTeM</div>
 
-            <div class="header-status">
-                <span>CORE v0.1.0</span>
-                <span class="status-online">● ONLINE</span>
+            <div class="system-name">
+                SYSTeM
             </div>
+
+            <div class="system-meta">
+                <div class="version">
+                    CORE v0.1.0
+                </div>
+
+                <div class="online">
+                    <span class="status-dot"></span>
+                    <span data-i18n="header.online">ONLINE</span>
+                </div>
+            </div>
+
         </header>
 
 
-        <section class="system-status panel">
+        <!-- SYSTEM STATUS -->
+        <section class="panel status-panel">
 
-            <div class="panel-title">
+            <div class="panel-title" data-i18n="status.title">
                 SYSTEM STATUS
             </div>
 
-            <div class="status-grid">
-
-                <div class="status-item">
-                    <span>STATUS</span>
-                    <strong id="system-status">ONLINE</strong>
+            <div class="status-row">
+                <div class="status-label" data-i18n="status.status">
+                    STATUS
                 </div>
 
-                <div class="status-item">
-                    <span>USER</span>
-                    <strong>UNKNOWN</strong>
+                <div class="status-value" data-i18n="status.online">
+                    ONLINE
+                </div>
+            </div>
+
+            <div class="status-row">
+                <div class="status-label" data-i18n="status.user">
+                    USER
                 </div>
 
-                <div class="status-item">
-                    <span>PURPOSE</span>
-                    <strong>UNKNOWN</strong>
+                <div
+                    class="status-value"
+                    data-i18n="status.unknown"
+                >
+                    UNKNOWN
+                </div>
+            </div>
+
+            <div class="status-row">
+                <div class="status-label" data-i18n="status.purpose">
+                    PURPOSE
                 </div>
 
+                <div
+                    class="status-value"
+                    data-i18n="status.unknown"
+                >
+                    UNKNOWN
+                </div>
             </div>
 
         </section>
 
 
-        <section class="process-panel panel">
+        <!-- PROCESS -->
+        <section class="panel process-panel">
 
-            <div class="panel-title">
+            <div class="panel-title" data-i18n="process.title">
                 PROCESS
             </div>
 
-            <div class="resource-display">
+            <div class="process-content">
 
-                <div class="resource-label">
+                <div class="resource-label" data-i18n="process.resource">
                     RESOURCE
                 </div>
 
@@ -67,25 +100,26 @@
                     id="resource-value"
                     class="resource-value"
                 >
-                    000000
+                    000005
                 </div>
 
-            </div>
+                <button
+                    id="process-button"
+                    class="process-button"
+                    type="button"
+                >
+                    [ PROCESS ]
+                </button>
 
-            <button
-                id="process-button"
-                class="process-button"
-                type="button"
-            >
-                [ PROCESS ]
-            </button>
+            </div>
 
         </section>
 
 
-        <section class="log-panel panel">
+        <!-- SYSTEM LOG -->
+        <section class="panel log-panel">
 
-            <div class="panel-title">
+            <div class="panel-title" data-i18n="log.title">
                 SYSTEM LOG
             </div>
 
@@ -94,33 +128,32 @@
                 class="system-log"
                 aria-live="polite"
             >
-                <div class="log-line">
-                    <span class="log-prefix">&gt;</span>
-                    <span>SYSTEM INITIALIZED</span>
-                </div>
-
-                <div class="log-line">
-                    <span class="log-prefix">&gt;</span>
-                    <span>WAITING FOR INPUT</span>
-                </div>
+                <!-- Logs inserted by JS -->
             </div>
 
         </section>
 
 
+        <!-- FOOTER -->
         <footer class="system-footer">
 
-            <span>SYSTeM</span>
+            <div>
+                SYSTeM
+            </div>
 
-            <span id="save-status">
+            <div data-i18n="footer.ready">
                 STATE: READY
-            </span>
+            </div>
 
         </footer>
 
     </main>
 
 
+    <!-- LANGUAGE DATA -->
+    <script src="js/locales.js"></script>
+
+    <!-- SYSTEM CORE -->
     <script src="js/system.js"></script>
 
 </body>
