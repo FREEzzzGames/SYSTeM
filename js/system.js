@@ -134,9 +134,291 @@ const Process = {
         Debug.info(
             "Process executed",
             {
+
                 resource:
                     State.resource
+
             }
+        );
+    }
+};
+
+
+/* =========================================================
+   RADIO
+   ========================================================= */
+
+const Radio = {
+
+    streamURL:
+        "https://player.gtiradio.ru/?id=standart",
+
+    iframe: null,
+
+    playButton: null,
+
+    stopButton: null,
+
+    initialized: false,
+
+
+    init() {
+
+        if (
+            this.initialized
+        ) {
+
+            return;
+        }
+
+
+        this.initialized = true;
+
+        this.createControls();
+
+        this.bindEvents();
+
+        this.updateButtons();
+    },
+
+
+    createControls() {
+
+        const processPanel =
+            document.querySelector(
+                ".process-panel"
+            );
+
+
+        if (
+            !processPanel
+        ) {
+
+            return;
+        }
+
+
+        const existing =
+            document.getElementById(
+                "radio-controls"
+            );
+
+
+        if (
+            existing
+        ) {
+
+            return;
+        }
+
+
+        const controls =
+            document.createElement(
+                "div"
+            );
+
+
+        controls.id =
+            "radio-controls";
+
+
+        controls.className =
+            "radio-controls";
+
+
+        controls.innerHTML = `
+            <button
+                id="radio-play"
+                class="radio-button"
+                type="button"
+                aria-label="Play radio"
+                title="Play"
+            >▶</button>
+
+            <button
+                id="radio-stop"
+                class="radio-button"
+                type="button"
+                aria-label="Stop radio"
+                title="Stop"
+            >■</button>
+        `;
+
+
+        processPanel.appendChild(
+            controls
+        );
+
+
+        this.playButton =
+            document.getElementById(
+                "radio-play"
+            );
+
+
+        this.stopButton =
+            document.getElementById(
+                "radio-stop"
+            );
+    },
+
+
+    bindEvents() {
+
+        if (
+            this.playButton
+        ) {
+
+            this.playButton.addEventListener(
+                "click",
+                () => {
+
+                    this.play();
+
+                }
+            );
+        }
+
+
+        if (
+            this.stopButton
+        ) {
+
+            this.stopButton.addEventListener(
+                "click",
+                () => {
+
+                    this.stop();
+
+                }
+            );
+        }
+    },
+
+
+    play() {
+
+        if (
+            this.iframe
+        ) {
+
+            return;
+        }
+
+
+        const iframe =
+            document.createElement(
+                "iframe"
+            );
+
+
+        iframe.src =
+            this.streamURL;
+
+
+        iframe.title =
+            "SYSTeM Radio";
+
+
+        iframe.setAttribute(
+            "allow",
+            "autoplay"
+        );
+
+
+        iframe.setAttribute(
+            "frameborder",
+            "0"
+        );
+
+
+        iframe.setAttribute(
+            "scrolling",
+            "no"
+        );
+
+
+        iframe.className =
+            "radio-iframe";
+
+
+        this.iframe =
+            iframe;
+
+
+        document.body.appendChild(
+            iframe
+        );
+
+
+        this.updateButtons();
+
+
+        Debug.info(
+            "Radio play requested"
+        );
+    },
+
+
+    stop() {
+
+        if (
+            this.iframe
+        ) {
+
+            this.iframe.remove();
+
+            this.iframe = null;
+        }
+
+
+        this.updateButtons();
+
+
+        Debug.info(
+            "Radio stopped"
+        );
+    },
+
+
+    updateButtons() {
+
+        if (
+            !this.playButton ||
+            !this.stopButton
+        ) {
+
+            return;
+        }
+
+
+        const playing =
+            Boolean(
+                this.iframe
+            );
+
+
+        this.playButton.classList.toggle(
+            "active",
+            playing
+        );
+
+
+        this.stopButton.classList.toggle(
+            "active",
+            !playing
+        );
+
+
+        this.playButton.setAttribute(
+            "aria-pressed",
+            String(playing)
+        );
+
+
+        this.stopButton.setAttribute(
+            "aria-pressed",
+            String(!playing)
         );
     }
 };
@@ -204,6 +486,14 @@ const Game = {
          */
 
         UI.render();
+
+
+        /*
+         * Initialize radio after
+         * the base UI exists.
+         */
+
+        Radio.init();
 
 
         Debug.info(
@@ -503,6 +793,9 @@ window.SYSTEM = {
 
     ui:
         UI,
+
+    radio:
+        Radio,
 
     debug:
         Debug,
