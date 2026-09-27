@@ -1,7 +1,7 @@
 /* =========================================================
    SYSTeM
-   CORE v0.1.1
-   ECONOMY FOUNDATION
+   CORE v0.1.2
+   ECONOMY + FIRST UPGRADE
    ========================================================= */
 
 
@@ -13,7 +13,7 @@ const SYSTEM_CONFIG = {
 
     name: "SYSTeM",
 
-    version: "0.1.1",
+    version: "0.1.2",
 
     module: "CORE",
 
@@ -23,9 +23,7 @@ const SYSTEM_CONFIG = {
 
     maxLogEntries: 50,
 
-    /* -----------------------------------------------------
-       ECONOMY
-       ----------------------------------------------------- */
+    /* ECONOMY */
 
     initialCredits: 0,
 
@@ -203,40 +201,6 @@ const Credits = {
 
 const Economy = {
 
-    /* -----------------------------------------------------
-       RESOURCE → CREDITS
-       ----------------------------------------------------- */
-
-    convertResourceToCredits(amount) {
-
-        if (
-            typeof amount !== "number" ||
-            !Number.isFinite(amount) ||
-            amount <= 0
-        ) {
-
-            return 0;
-        }
-
-
-        const credits =
-            amount *
-            SYSTEM_CONFIG.resourceToCredits;
-
-
-        Credits.add(
-            credits
-        );
-
-
-        return credits;
-    },
-
-
-    /* -----------------------------------------------------
-       CURRENT PRODUCTION VALUE
-       ----------------------------------------------------- */
-
     getProductionAmount() {
 
         return (
@@ -245,10 +209,6 @@ const Economy = {
         );
     },
 
-
-    /* -----------------------------------------------------
-       UPGRADE
-       ----------------------------------------------------- */
 
     canUpgrade() {
 
@@ -265,6 +225,19 @@ const Economy = {
             !this.canUpgrade()
         ) {
 
+            Debug.info(
+                "Upgrade unavailable",
+                {
+
+                    credits:
+                        State.credits,
+
+                    required:
+                        State.upgradeCost
+
+                }
+            );
+
             return false;
         }
 
@@ -273,9 +246,11 @@ const Economy = {
             State.upgradeCost;
 
 
-        if (
-            !Credits.spend(cost)
-        ) {
+        const spent =
+            Credits.spend(cost);
+
+
+        if (!spent) {
 
             return false;
         }
@@ -289,11 +264,6 @@ const Economy = {
                 State.upgradeCost *
                 SYSTEM_CONFIG.upgradeCostMultiplier
             );
-
-
-        Log.add(
-            "log.upgradeComplete"
-        );
 
 
         UI.renderEconomy();
@@ -334,9 +304,11 @@ const Log = {
 
         this.entries.push({
 
-            key: key,
+            key:
+                key,
 
-            time: Date.now()
+            time:
+                Date.now()
 
         });
 
@@ -420,6 +392,37 @@ const Process = {
 
 
 /* =========================================================
+   ECONOMY CONVERSION
+   ========================================================= */
+
+Economy.convertResourceToCredits =
+    function(amount) {
+
+        if (
+            typeof amount !== "number" ||
+            !Number.isFinite(amount) ||
+            amount <= 0
+        ) {
+
+            return 0;
+        }
+
+
+        const credits =
+            amount *
+            SYSTEM_CONFIG.resourceToCredits;
+
+
+        Credits.add(
+            credits
+        );
+
+
+        return credits;
+    };
+
+
+/* =========================================================
    GAME
    ========================================================= */
 
@@ -439,30 +442,22 @@ const Game = {
             true;
 
 
-        /* -------------------------------------------------
-           INITIALIZE LOCALIZATION
-           ------------------------------------------------- */
+        /* LOCALIZATION */
 
         SYSTEM_I18N.init();
 
 
-        /* -------------------------------------------------
-           INITIALIZE LANGUAGE SWITCHER
-           ------------------------------------------------- */
+        /* LANGUAGE SWITCHER */
 
         SYSTEM_LANGUAGE_SWITCHER.init();
 
 
-        /* -------------------------------------------------
-           INITIALIZE UI
-           ------------------------------------------------- */
+        /* UI */
 
         UI.bindEvents();
 
 
-        /* -------------------------------------------------
-           INITIAL SYSTEM MESSAGES
-           ------------------------------------------------- */
+        /* INITIAL LOG */
 
         Log.add(
             "log.systemInitialized"
@@ -474,9 +469,7 @@ const Game = {
         );
 
 
-        /* -------------------------------------------------
-           RENDER
-           ------------------------------------------------- */
+        /* RENDER */
 
         UI.render();
 
@@ -503,16 +496,34 @@ const Game = {
 
 const UI = {
 
-    resourceElement: null,
+    resourceElement:
+        null,
 
-    processButton: null,
+    processButton:
+        null,
 
-    logElement: null,
+    logElement:
+        null,
+
+    economyPanel:
+        null,
+
+    creditsElement:
+        null,
+
+    efficiencyElement:
+        null,
+
+    upgradeCostElement:
+        null,
+
+    upgradeButton:
+        null,
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        CACHE DOM
-       ----------------------------------------------------- */
+       ===================================================== */
 
     cache() {
 
@@ -535,9 +546,9 @@ const UI = {
     },
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        EVENTS
-       ----------------------------------------------------- */
+       ===================================================== */
 
     bindEvents() {
 
@@ -560,13 +571,15 @@ const UI = {
     },
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        COMPLETE RENDER
-       ----------------------------------------------------- */
+       ===================================================== */
 
     render() {
 
         this.renderResource();
+
+        this.ensureEconomyUI();
 
         this.renderEconomy();
 
@@ -578,9 +591,9 @@ const UI = {
     },
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
        RESOURCE
-       ----------------------------------------------------- */
+       ===================================================== */
 
     renderResource() {
 
@@ -599,33 +612,303 @@ const UI = {
     },
 
 
-    /* -----------------------------------------------------
-       ECONOMY
-       ----------------------------------------------------- */
+    /* =====================================================
+       ECONOMY UI
+       ===================================================== */
 
-    renderEconomy() {
+    ensureEconomyUI() {
 
-        /*
-         * Economy is intentionally not added
-         * to the visible interface yet.
-         *
-         * This keeps the current geometry
-         * completely unchanged.
-         *
-         * The values remain available through:
-         *
-         * SYSTEM.credits
-         * SYSTEM.state.efficiency
-         * SYSTEM.economy
-         */
+        if (
+            this.economyPanel
+        ) {
 
-        return;
+            return;
+        }
+
+
+        if (
+            !this.processButton
+        ) {
+
+            return;
+        }
+
+
+        const processPanel =
+            this.processButton.closest(
+                ".process-panel"
+            );
+
+
+        if (
+            !processPanel
+        ) {
+
+            Debug.info(
+                "Economy UI target not found"
+            );
+
+            return;
+        }
+
+
+        const panel =
+            document.createElement(
+                "div"
+            );
+
+
+        panel.className =
+            "system-economy";
+
+
+        panel.style.marginTop =
+            "10px";
+
+
+        panel.style.padding =
+            "8px";
+
+
+        panel.style.border =
+            "1px solid rgba(0,255,120,0.25)";
+
+
+        panel.style.fontFamily =
+            "inherit";
+
+
+        panel.style.fontSize =
+            "12px";
+
+
+        panel.style.lineHeight =
+            "1.6";
+
+
+        panel.style.textAlign =
+            "left";
+
+
+        panel.style.boxSizing =
+            "border-box";
+
+
+        const credits =
+            document.createElement(
+                "div"
+            );
+
+
+        credits.innerHTML =
+            "CREDITS: <span></span>";
+
+
+        this.creditsElement =
+            credits.querySelector(
+                "span"
+            );
+
+
+        const efficiency =
+            document.createElement(
+                "div"
+            );
+
+
+        efficiency.innerHTML =
+            "EFFICIENCY: x<span></span>";
+
+
+        this.efficiencyElement =
+            efficiency.querySelector(
+                "span"
+            );
+
+
+        const cost =
+            document.createElement(
+                "div"
+            );
+
+
+        cost.innerHTML =
+            "NEXT UPGRADE: <span></span>";
+
+
+        this.upgradeCostElement =
+            cost.querySelector(
+                "span"
+            );
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.textContent =
+            "[ UPGRADE ]";
+
+
+        button.style.marginTop =
+            "6px";
+
+
+        button.style.width =
+            "100%";
+
+
+        button.style.padding =
+            "6px";
+
+
+        button.style.background =
+            "transparent";
+
+
+        button.style.color =
+            "inherit";
+
+
+        button.style.border =
+            "1px solid currentColor";
+
+
+        button.style.fontFamily =
+            "inherit";
+
+
+        button.style.cursor =
+            "pointer";
+
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                Economy.upgrade();
+
+            }
+        );
+
+
+        this.upgradeButton =
+            button;
+
+
+        panel.appendChild(
+            credits
+        );
+
+
+        panel.appendChild(
+            efficiency
+        );
+
+
+        panel.appendChild(
+            cost
+        );
+
+
+        panel.appendChild(
+            button
+        );
+
+
+        processPanel.appendChild(
+            panel
+        );
+
+
+        this.economyPanel =
+            panel;
     },
 
 
-    /* -----------------------------------------------------
+    /* =====================================================
+       ECONOMY RENDER
+       ===================================================== */
+
+    renderEconomy() {
+
+        this.ensureEconomyUI();
+
+
+        if (
+            !this.economyPanel
+        ) {
+
+            return;
+        }
+
+
+        if (
+            this.creditsElement
+        ) {
+
+            this.creditsElement.textContent =
+                Credits.format(
+                    Credits.get()
+                );
+        }
+
+
+        if (
+            this.efficiencyElement
+        ) {
+
+            this.efficiencyElement.textContent =
+                State.efficiency;
+        }
+
+
+        if (
+            this.upgradeCostElement
+        ) {
+
+            this.upgradeCostElement.textContent =
+                Credits.format(
+                    State.upgradeCost
+                );
+        }
+
+
+        if (
+            this.upgradeButton
+        ) {
+
+            const available =
+                Economy.canUpgrade();
+
+
+            this.upgradeButton.disabled =
+                !available;
+
+
+            this.upgradeButton.style.opacity =
+                available
+                    ? "1"
+                    : "0.45";
+
+
+            this.upgradeButton.style.cursor =
+                available
+                    ? "pointer"
+                    : "not-allowed";
+        }
+    },
+
+
+    /* =====================================================
        LOG
-       ----------------------------------------------------- */
+       ===================================================== */
 
     renderLog() {
 
@@ -678,11 +961,6 @@ const UI = {
                     "log-text";
 
 
-                /*
-                 * The log stores translation keys,
-                 * not translated text.
-                 */
-
                 text.textContent =
                     t(entry.key);
 
@@ -716,7 +994,8 @@ const UI = {
 
 const Debug = {
 
-    enabled: true,
+    enabled:
+        true,
 
 
     info(
