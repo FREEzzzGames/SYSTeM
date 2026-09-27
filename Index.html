@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SYSTeM</title>
+
+    <link rel="stylesheet" href="css/system.css">
+</head>
+
+<body>
+
+    <main id="system">
+
+        <header class="system-header">
+            <div class="brand">SYSTeM</div>
+
+            <div class="header-status">
+                <span>CORE v0.1.0</span>
+                <span class="status-online">● ONLINE</span>
+            </div>
+        </header>
+
+
+        <section class="system-status panel">
+
+            <div class="panel-title">
+                SYSTEM STATUS
+            </div>
+
+            <div class="status-grid">
+
+                <div class="status-item">
+                    <span>STATUS</span>
+                    <strong id="system-status">ONLINE</strong>
+                </div>
+
+                <div class="status-item">
+                    <span>USER</span>
+                    <strong>UNKNOWN</strong>
+                </div>
+
+                <div class="status-item">
+                    <span>PURPOSE</span>
+                    <strong>UNKNOWN</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="process-panel panel">
+
+            <div class="panel-title">
+                PROCESS
+            </div>
+
+            <div class="resource-display">
+
+                <div class="resource-label">
+                    RESOURCE
+                </div>
+
+                <div
+                    id="resource-value"
+                    class="resource-value"
+                >
+                    000000
+                </div>
+
+            </div>
+
+            <button
+                id="process-button"
+                class="process-button"
+                type="button"
+            >
+                [ PROCESS ]
+            </button>
+
+        </section>
+
+
+        <section class="log-panel panel">
+
+            <div class="panel-title">
+                SYSTEM LOG
+            </div>
+
+            <div
+                id="system-log"
+                class="system-log"
+                aria-live="polite"
+            >
+                <div class="log-line">
+                    <span class="log-prefix">&gt;</span>
+                    <span>SYSTEM INITIALIZED</span>
+                </div>
+
+                <div class="log-line">
+                    <span class="log-prefix">&gt;</span>
+                    <span>WAITING FOR INPUT</span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <footer class="system-footer">
+
+            <span>SYSTeM</span>
+
+            <span id="save-status">
+                STATE: READY
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <script src="js/system.js"></script>
+
+</body>
+</html>
