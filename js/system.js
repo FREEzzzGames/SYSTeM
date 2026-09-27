@@ -1,576 +1,536 @@
-"use strict";
-
-/*
- * ============================================================
- * SYSTeM
- * CORE FOUNDATION
- * Version: 0.1.0
- *
- * Current modules:
- * - Core
- * - State
- * - Process
- * - Resources
- * - Log
- *
- * Not implemented yet:
- * - Economy
- * - Upgrades
- * - Automation
- * - Technology
- * - Story
- * - Events
- * - Offline
- * - Prestige
- *
- * Architecture rule:
- *
- * UI -> Game API -> State
- *
- * UI must never directly modify game state.
- * ============================================================
- */
+/* =========================================================
+   SYSTeM
+   CORE v0.1.0
+   Core Foundation
+   ========================================================= */
 
 
-/* ============================================================
-   CONFIGURATION
-   ============================================================ */
+/* =========================================================
+   SYSTEM CONFIG
+   ========================================================= */
 
-const SYSTEM_CONFIG = Object.freeze({
+const SYSTEM_CONFIG = {
+
+    name: "SYSTeM",
 
     version: "0.1.0",
 
-    resource: {
-        id: "resource",
-        initial: 0
-    },
+    module: "CORE",
 
-    log: {
-        maxEntries: 100
-    }
+    initialResource: 0,
 
-});
+    resourceStep: 1,
+
+    maxLogEntries: 50
+};
 
 
-/* ============================================================
-   STATE
-   ============================================================ */
+/* =========================================================
+   GAME STATE
+   ========================================================= */
 
 const State = {
 
-    data: {
+    resource:
+        SYSTEM_CONFIG.initialResource,
 
-        version: SYSTEM_CONFIG.version,
+    ready: true,
 
-        resources: {
-            resource: SYSTEM_CONFIG.resource.initial
-        },
-
-        progression: {
-            level: 1
-        },
-
-        statistics: {
-            totalProcesses: 0,
-            sessionProcesses: 0
-        },
-
-        story: {
-            currentLevel: 1,
-            eventsSeen: []
-        },
-
-        settings: {},
-
-        session: {
-            startedAt: Date.now()
-        }
-
-    },
-
-
-    get() {
-        return this.data;
-    },
-
-
-    reset() {
-
-        this.data = {
-
-            version: SYSTEM_CONFIG.version,
-
-            resources: {
-                resource: SYSTEM_CONFIG.resource.initial
-            },
-
-            progression: {
-                level: 1
-            },
-
-            statistics: {
-                totalProcesses: 0,
-                sessionProcesses: 0
-            },
-
-            story: {
-                currentLevel: 1,
-                eventsSeen: []
-            },
-
-            settings: {},
-
-            session: {
-                startedAt: Date.now()
-            }
-
-        };
-
-    }
-
+    initialized: false
 };
 
 
-/* ============================================================
-   RESOURCES
-   ============================================================ */
+/* =========================================================
+   RESOURCE ENGINE
+   ========================================================= */
 
 const Resources = {
 
-    get(id = SYSTEM_CONFIG.resource.id) {
+    get() {
 
-        return State.data.resources[id] ?? 0;
-
+        return State.resource;
     },
 
 
-    add(id, amount) {
+    add(amount) {
 
-        if (!Number.isFinite(amount)) {
-            return false;
-        }
+        State.resource += amount;
 
-        if (amount <= 0) {
-            return false;
-        }
-
-        if (!(id in State.data.resources)) {
-            State.data.resources[id] = 0;
-        }
-
-        State.data.resources[id] += amount;
-
-        return true;
-
+        return State.resource;
     },
 
 
-    remove(id, amount) {
+    format(value) {
 
-        if (!Number.isFinite(amount)) {
-            return false;
-        }
-
-        if (amount <= 0) {
-            return false;
-        }
-
-        const current = this.get(id);
-
-        if (current < amount) {
-            return false;
-        }
-
-        State.data.resources[id] -= amount;
-
-        return true;
-
-    },
-
-
-    has(id, amount) {
-
-        return this.get(id) >= amount;
-
+        return String(value)
+            .padStart(6, "0");
     }
-
 };
 
 
-/* ============================================================
-   LOG
-   ============================================================ */
+/* =========================================================
+   SYSTEM LOG
+   ========================================================= */
 
 const Log = {
 
     entries: [],
 
 
-    add(message, type = "system") {
+    add(key) {
 
-        const entry = {
+        this.entries.push({
 
-            id: `${Date.now()}-${Math.random()
-                .toString(36)
-                .slice(2, 8)}`,
+            key: key,
 
-            timestamp: Date.now(),
+            time: Date.now()
 
-            type,
-
-            message
-
-        };
-
-        this.entries.push(entry);
+        });
 
 
         if (
             this.entries.length >
-            SYSTEM_CONFIG.log.maxEntries
+            SYSTEM_CONFIG.maxLogEntries
         ) {
 
             this.entries.shift();
-
         }
 
 
         UI.renderLog();
+    },
 
-        return entry;
 
+    clear() {
+
+        this.entries = [];
+
+        UI.renderLog();
     }
-
 };
 
 
-/* ============================================================
-   PROCESS
-   ============================================================ */
+/* =========================================================
+   PROCESS ENGINE
+   ========================================================= */
 
 const Process = {
 
     execute() {
 
         Resources.add(
-            SYSTEM_CONFIG.resource.id,
-            1
+            SYSTEM_CONFIG.resourceStep
         );
 
 
-        State.data.statistics.totalProcesses += 1;
-
-        State.data.statistics.sessionProcesses += 1;
-
-
-        Log.add("PROCESS COMPLETE");
+        Log.add(
+            "log.processComplete"
+        );
 
 
-        UI.render();
+        UI.renderResource();
 
+
+        Debug.info(
+            "Process executed",
+            {
+                resource:
+                    State.resource
+            }
+        );
     }
-
 };
 
 
-/* ============================================================
-   GAME CORE
-   ============================================================ */
+/* =========================================================
+   GAME
+   ========================================================= */
 
 const Game = {
 
-    initialized: false,
+    boot() {
 
+        if (
+            State.initialized
+        ) {
 
-    init() {
-
-        if (this.initialized) {
             return;
         }
 
 
-        this.initialized = true;
+        State.initialized =
+            true;
 
 
-        UI.cache();
+        /*
+         * Initialize localization
+         * before rendering anything.
+         */
 
+        SYSTEM_I18N.init();
+
+
+        /*
+         * Initialize global language
+         * switcher.
+         */
+
+        SYSTEM_LANGUAGE_SWITCHER.init();
+
+
+        /*
+         * Initialize UI.
+         */
+
+        UI.bindEvents();
+
+
+        /*
+         * Initial system messages.
+         */
+
+        Log.add(
+            "log.systemInitialized"
+        );
+
+
+        Log.add(
+            "log.waitingForInput"
+        );
+
+
+        /*
+         * Render.
+         */
 
         UI.render();
 
 
-        Log.add("SYSTEM INITIALIZED");
+        Debug.info(
+            "SYSTeM boot complete",
+            {
 
-        Log.add("WAITING FOR INPUT");
+                version:
+                    SYSTEM_CONFIG.version,
 
+                language:
+                    SYSTEM_I18N.currentLanguage
 
-        console.info(
-            `[SYSTeM] CORE ${SYSTEM_CONFIG.version} initialized`
+            }
         );
-
-    },
-
-
-    process() {
-
-        Process.execute();
-
-    },
-
-
-    tick() {
-
-        /*
-         * Reserved for the future game loop.
-         *
-         * Later this will handle:
-         * - passive production
-         * - timers
-         * - events
-         * - offline calculations
-         *
-         * Nothing is intentionally executed here yet.
-         */
-
-    },
-
-
-    getState() {
-
-        return State.get();
-
     }
-
 };
 
 
-/* ============================================================
+/* =========================================================
    UI
-   ============================================================ */
+   ========================================================= */
 
 const UI = {
 
-    elements: {},
+    resourceElement: null,
 
+    processButton: null,
+
+    logElement: null,
+
+
+    /* -----------------------------------------------------
+       CACHE DOM
+       ----------------------------------------------------- */
 
     cache() {
 
-        this.elements.resourceValue =
+        this.resourceElement =
             document.getElementById(
                 "resource-value"
             );
 
 
-        this.elements.processButton =
+        this.processButton =
             document.getElementById(
                 "process-button"
             );
 
 
-        this.elements.systemLog =
+        this.logElement =
             document.getElementById(
                 "system-log"
             );
+    },
 
 
-        this.elements.saveStatus =
-            document.getElementById(
-                "save-status"
-            );
+    /* -----------------------------------------------------
+       EVENTS
+       ----------------------------------------------------- */
+
+    bindEvents() {
+
+        this.cache();
 
 
-        this.elements.processButton
-            .addEventListener(
+        if (
+            this.processButton
+        ) {
+
+            this.processButton.addEventListener(
                 "click",
                 () => {
 
-                    Game.process();
+                    Process.execute();
 
                 }
             );
-
+        }
     },
 
+
+    /* -----------------------------------------------------
+       COMPLETE RENDER
+       ----------------------------------------------------- */
 
     render() {
 
         this.renderResource();
 
+        SYSTEM_I18N.apply();
+
         this.renderLog();
 
-        this.renderSaveStatus();
-
+        SYSTEM_I18N.updateSwitcher();
     },
 
+
+    /* -----------------------------------------------------
+       RESOURCE
+       ----------------------------------------------------- */
 
     renderResource() {
 
-        const value =
-            Resources.get(
-                SYSTEM_CONFIG.resource.id
+        if (
+            !this.resourceElement
+        ) {
+
+            return;
+        }
+
+
+        this.resourceElement.textContent =
+            Resources.format(
+                Resources.get()
             );
-
-
-        this.elements.resourceValue
-            .textContent =
-            String(value).padStart(6, "0");
-
     },
 
+
+    /* -----------------------------------------------------
+       LOG
+       ----------------------------------------------------- */
 
     renderLog() {
 
-        const container =
-            this.elements.systemLog;
+        if (
+            !this.logElement
+        ) {
 
-
-        if (!container) {
             return;
         }
 
 
-        container.innerHTML = "";
+        this.logElement.innerHTML =
+            "";
 
 
-        for (const entry of Log.entries) {
+        Log.entries.forEach(
+            entry => {
 
-            const line =
-                document.createElement("div");
-
-            line.className = "log-line";
-
-
-            const prefix =
-                document.createElement("span");
-
-            prefix.className = "log-prefix";
-
-            prefix.textContent = ">";
+                const line =
+                    document.createElement(
+                        "div"
+                    );
 
 
-            const message =
-                document.createElement("span");
-
-            message.textContent =
-                entry.message;
+                line.className =
+                    "log-line";
 
 
-            line.appendChild(prefix);
-
-            line.appendChild(message);
-
-            container.appendChild(line);
-
-        }
+                const prefix =
+                    document.createElement(
+                        "span"
+                    );
 
 
-        container.scrollTop =
-            container.scrollHeight;
-
-    },
+                prefix.className =
+                    "log-prefix";
 
 
-    renderSaveStatus() {
-
-        if (!this.elements.saveStatus) {
-            return;
-        }
+                prefix.textContent =
+                    ">";
 
 
-        this.elements.saveStatus
-            .textContent =
-            "STATE: READY";
+                const text =
+                    document.createElement(
+                        "span"
+                    );
 
+
+                text.className =
+                    "log-text";
+
+
+                /*
+                 * Important:
+                 * The log stores the translation KEY,
+                 * not the translated text.
+                 *
+                 * Therefore changing language
+                 * immediately updates old messages too.
+                 */
+
+                text.textContent =
+                    t(entry.key);
+
+
+                line.appendChild(
+                    prefix
+                );
+
+
+                line.appendChild(
+                    text
+                );
+
+
+                this.logElement.appendChild(
+                    line
+                );
+            }
+        );
+
+
+        this.logElement.scrollTop =
+            this.logElement.scrollHeight;
     }
-
 };
 
 
-/* ============================================================
+/* =========================================================
    DEBUG
-   ============================================================ */
+   ========================================================= */
 
 const Debug = {
 
-    inspect() {
-
-        console.log(
-            "========== SYSTeM DEBUG =========="
-        );
+    enabled: true,
 
 
-        console.log(
-            "Version:",
-            SYSTEM_CONFIG.version
-        );
+    info(
+        message,
+        data = null
+    ) {
+
+        if (
+            !this.enabled
+        ) {
+
+            return;
+        }
 
 
-        console.log(
-            "State:",
-            State.get()
-        );
+        if (
+            data !== null
+        ) {
+
+            console.info(
+                `[SYSTeM] ${message}`,
+                data
+            );
+
+        } else {
+
+            console.info(
+                `[SYSTeM] ${message}`
+            );
+        }
+    },
 
 
-        console.log(
-            "Resources:",
-            State.data.resources
-        );
+    error(
+        message,
+        error = null
+    ) {
 
+        if (
+            error
+        ) {
 
-        console.log(
-            "Statistics:",
-            State.data.statistics
-        );
+            console.error(
+                `[SYSTeM] ${message}`,
+                error
+            );
 
+        } else {
 
-        console.log(
-            "Log:",
-            Log.entries
-        );
-
-
-        console.log(
-            "=================================="
-        );
-
+            console.error(
+                `[SYSTeM] ${message}`
+            );
+        }
     }
-
 };
 
 
-/* ============================================================
-   GLOBAL DEBUG ACCESS
-   ============================================================ */
+/* =========================================================
+   PUBLIC SYSTEM OBJECT
+   ========================================================= */
 
 window.SYSTEM = {
 
-    version: SYSTEM_CONFIG.version,
+    config:
+        SYSTEM_CONFIG,
 
-    Game,
+    state:
+        State,
 
-    State,
+    resources:
+        Resources,
 
-    Resources,
+    process:
+        Process,
 
-    Process,
+    log:
+        Log,
 
-    Log,
+    game:
+        Game,
 
-    UI,
+    ui:
+        UI,
 
-    Debug
+    debug:
+        Debug,
 
+    i18n:
+        SYSTEM_I18N
 };
 
 
-/* ============================================================
+/* =========================================================
    BOOT
-   ============================================================ */
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        Game.init();
+        try {
+
+            Game.boot();
+
+        } catch (error) {
+
+            Debug.error(
+                "Boot failure",
+                error
+            );
+        }
 
     }
 );
