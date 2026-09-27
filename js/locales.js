@@ -1,7 +1,7 @@
 /* =========================================================
    SYSTeM
    Localization Database
-   CORE v0.1.0
+   CORE v0.1.2
 
    Languages:
    RU - Russian
@@ -47,6 +47,22 @@ window.SYSTEM_LOCALES = {
 
         "process.button":
             "[ ЗАПУСК ]",
+
+        /* ECONOMY */
+
+        "economy.credits":
+            "КРЕДИТЫ",
+
+        "economy.efficiency":
+            "ЭФФЕКТИВНОСТЬ",
+
+        "economy.nextUpgrade":
+            "СЛЕДУЮЩЕЕ УЛУЧШЕНИЕ",
+
+        "economy.upgrade":
+            "[ УЛУЧШИТЬ ]",
+
+        /* LOG */
 
         "log.title":
             "СИСТЕМНЫЙ ЖУРНАЛ",
@@ -101,6 +117,22 @@ window.SYSTEM_LOCALES = {
         "process.button":
             "[ START ]",
 
+        /* ECONOMY */
+
+        "economy.credits":
+            "CREDITS",
+
+        "economy.efficiency":
+            "EFFIZIENZ",
+
+        "economy.nextUpgrade":
+            "NÄCHSTES UPGRADE",
+
+        "economy.upgrade":
+            "[ VERBESSERN ]",
+
+        /* LOG */
+
         "log.title":
             "SYSTEMPROTOKOLL",
 
@@ -154,6 +186,22 @@ window.SYSTEM_LOCALES = {
         "process.button":
             "[ PROCESS ]",
 
+        /* ECONOMY */
+
+        "economy.credits":
+            "CREDITS",
+
+        "economy.efficiency":
+            "EFFICIENCY",
+
+        "economy.nextUpgrade":
+            "NEXT UPGRADE",
+
+        "economy.upgrade":
+            "[ UPGRADE ]",
+
+        /* LOG */
+
         "log.title":
             "SYSTEM LOG",
 
@@ -179,7 +227,8 @@ window.SYSTEM_LOCALES = {
 
 window.SYSTEM_I18N = {
 
-    defaultLanguage: "ru",
+    defaultLanguage:
+        "ru",
 
     supportedLanguages: [
         "ru",
@@ -187,7 +236,8 @@ window.SYSTEM_I18N = {
         "en"
     ],
 
-    currentLanguage: "ru",
+    currentLanguage:
+        "ru",
 
 
     /* -----------------------------------------------------
@@ -227,7 +277,8 @@ window.SYSTEM_I18N = {
             )
         ) {
 
-            language = urlLanguage;
+            language =
+                urlLanguage;
 
         } else if (
             savedLanguage &&
@@ -236,7 +287,8 @@ window.SYSTEM_I18N = {
             )
         ) {
 
-            language = savedLanguage;
+            language =
+                savedLanguage;
 
         } else if (
             browserLanguage &&
@@ -245,7 +297,8 @@ window.SYSTEM_I18N = {
             )
         ) {
 
-            language = browserLanguage;
+            language =
+                browserLanguage;
         }
 
 
@@ -300,16 +353,23 @@ window.SYSTEM_I18N = {
 
 
         /*
-         * Important:
          * Re-render dynamic content immediately.
-         * This means existing system log entries
-         * change language without page reload.
+         * Existing log entries and economy UI
+         * update without page reload.
          */
 
         if (
             window.SYSTEM &&
             SYSTEM.ui
         ) {
+
+            if (
+                SYSTEM.ui.renderEconomy
+            ) {
+
+                SYSTEM.ui.renderEconomy();
+            }
+
 
             SYSTEM.ui.renderLog();
         }
@@ -471,18 +531,22 @@ window.t = function(key) {
 
 window.SYSTEM_LANGUAGE_SWITCHER = {
 
-    initialized: false,
+    initialized:
+        false,
 
 
     init() {
 
-        if (this.initialized) {
+        if (
+            this.initialized
+        ) {
 
             return;
         }
 
 
-        this.initialized = true;
+        this.initialized =
+            true;
 
 
         const switcher =
